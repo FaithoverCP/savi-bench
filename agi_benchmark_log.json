@@ -1,0 +1,18 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs & local env
+*.log
+.env
+
+# Optional build artifacts (future-proof if we add charts tooling)
+node_modules/
+dist/
+build/
+.cache/
+
+# IMPORTANT: keep benchmark data tracked
+# (do NOT ignore data/*.json)
