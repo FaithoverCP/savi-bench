@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAVI Benchmarks</title>
+  <link rel="stylesheet" href="assets/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>🔴 SAVI Benchmarks</h1>
+    <p class="sub">Live hourly results with phase breakdown & competition highlights.</p>
+  </header>
+
+  <main>
+    <section class="cards" id="summary">
+      <div class="card"><h3>Total Runs (24h)</h3><div class="num" id="totalRuns">—</div></div>
+      <div class="card"><h3>Pass Rate</h3><div class="num" id="passRate">—</div></div>
+      <div class="card"><h3>Avg Score</h3><div class="num" id="avgScore">—</div></div>
+      <div class="card"><h3>Last Phase</h3><div class="num" id="lastPhase">—</div></div>
+    </section>
+
+    <section>
+      <h2>Phase Breakdown (24h)</h2>
+      <table id="phaseTable">
+        <thead><tr><th>Phase</th><th>Runs</th><th>Pass %</th><th>Avg Score</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </section>
+
+    <section>
+      <h2>Best Competition Run</h2>
+      <pre id="bestComp">No data yet.</pre>
+    </section>
+
+    <section>
+      <h2>Notes</h2>
+      <ul>
+        <li>Runner pushes <code>data/agi_benchmark_log.json</code> hourly.</li>
+        <li>If you see “No data yet”, refresh after the next run.</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer><small>© SAVI — auto-updates hourly.</small></footer>
+
+<script>
+async function loadData() {
+  try {
+    const res = await fetch('data/agi_benchmark_log.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Missing data file');
+    const log = await res.json();
+    if (!Array.isArray(log) || !log.length) throw new Error('Empty log');
+
+    const now = Date.now(), dayAgo = now - 24*3600*1000;
+    const use = log.filter(r => new Date(r.timestamp).getTime() >= dayAgo);
+    const rows = use.length ? use : log;
+
+    const total = rows.length;
+    const passes = rows.filter(r => r.status === 'pass').length;
+    const passRate = total ? ((passes/total)*100).toFixed(1)+'%' : '—';
+    const avgScore = total ? (rows.reduce((a,b)=>a+(+b.score||0),0)/total).toFixed(2) : '—';
+    const last = rows[rows.length-1] || {};
+
+    document.getElementById('totalRuns').textContent = total || '0';
+    document.getElementById('passRate').textContent = passRate;
+    document.getElementById('avgScore').textContent = avgScore;
+    document.getElementById('lastPhase').textContent = last.phase || '—';
+
+    const phases = ['Warm-up','Strength','Endurance','Competition'];
+    const stats = {}; phases.forEach(p => stats[p]={runs:0,pass:0,score:0});
+    rows.forEach(r => {
+      const p=r.phase||'Unknown';
+      stats[p] ??= {runs:0,pass:0,score:0};
+      stats[p].runs++; stats[p].pass += (r.status==='pass'); stats[p].score += (+r.score||0);
+    });
+    const tb = document.querySelector('#phaseTable tbody'); tb.innerHTML='';
+    [...phases, ...Object.keys(stats).filter(k=>!phases.includes(k))].forEach(p=>{
+      const s=stats[p]; if(!s||!s.runs) return;
+      const tr=document.createElement('tr');
+      tr.innerHTML=`<td>${p}</td><td>${s.runs}</td><td>${((s.pass/s.runs)*100).toFixed(1)}%</td><td>${(s.score/s.runs).toFixed(2)}</td>`;
+      tb.appendChild(tr);
+    });
+
+    const comp = rows.filter(r => r.phase==='Competition');
+    if (comp.length) {
+      comp.sort((a,b)=>(b.score||0)-(a.score||0));
+      const best=comp[0];
+      const trace=best.trace||best.reasoning||best.note||'(trace not captured)';
+      document.getElementById('bestComp').textContent =
+        `Time: ${best.timestamp}\nScore: ${best.score}\nRetries: ${best.retries||0}\nTrace: ${trace}`;
+    }
+  } catch {
+    document.getElementById('bestComp').textContent='No data yet.';
+  }
+}
+loadData();
+</script>
+</body>
+</html>
