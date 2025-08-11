@@ -1,0 +1,61 @@
+<script>
+async function loadSystemGains() {
+  try {
+    const res = await fetch('data/system_metrics.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error('system_metrics.json not found');
+    const d = await res.json();
+
+    // turn status dot green if this loads fine (works even if agi_benchmark_log is delayed)
+    const status = document.querySelector('#status-dot');
+    if (status) status.style.background = '#2ecc71';
+
+    // find a root container; fall back to body
+    const root = document.querySelector('#root') || document.body;
+
+    // make a pretty section
+    const card = document.createElement('section');
+    card.style.marginTop = '24px';
+    card.innerHTML = `
+      <h2>System Gains</h2>
+      <div><b>Model:</b> ${d.model}</div>
+      <div><b>Accuracy:</b> ${Number(d.metrics.accuracy_pct).toFixed(1)}%</div>
+      <div><b>Latency:</b> ${d.metrics.inference_latency_ms} ms</div>
+      <div><b>Train Time:</b> ${d.metrics.train_time_hours} h</div>
+      <div><b>Compute:</b> ${d.metrics.compute_tflops} TFLOPS</div>
+      <div><b>Energy Cost:</b> $${d.metrics.energy_cost_per_million_usd}/M queries</div>
+
+      <h3 style="margin-top:1rem">Competitor Delta</h3>
+      <table border="0" cellspacing="0" cellpadding="6" style="border-collapse:collapse">
+        <thead>
+          <tr>
+            <th align="left">Model</th>
+            <th align="right">Acc%</th>
+            <th align="right">Latency</th>
+            <th align="right">Train h</th>
+            <th align="right">TFLOPS</th>
+            <th align="right">$ /M</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${Array.isArray(d.comparisons) ? d.comparisons.map(c => `
+            <tr>
+              <td>${c.name}</td>
+              <td align="right">${c.accuracy_pct}</td>
+              <td align="right">${c.latency_ms} ms</td>
+              <td align="right">${c.train_hours}</td>
+              <td align="right">${c.tflops}</td>
+              <td align="right">$${c.energy_cost_usd}</td>
+            </tr>`).join('') : ''}
+        </tbody>
+      </table>
+      <div style="font-size:0.9em;margin-top:6px;color:#555">
+        Updated: ${new Date(d.updated_at).toLocaleString()}
+      </div>
+    `;
+    root.appendChild(card);
+  } catch (e) {
+    console.warn('System gains not loaded:', e.message);
+  }
+}
+loadSystemGains();
+</script>
