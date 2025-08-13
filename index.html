@@ -95,6 +95,7 @@ async function loadData() {
   }
 }
 loadData();
+setInterval(loadData, 60_000);
 </script>
 <script>
 async function loadSystemGains() {
@@ -156,6 +157,7 @@ async function loadSystemGains() {
   }
 }
 loadSystemGains();
+setInterval(loadSystemGains, 60_000);
 </script>
 </body>
 </html>
