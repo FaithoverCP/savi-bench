@@ -9,7 +9,7 @@
 <body>
   <header>
     <h1>🔴 SAVI Benchmarks</h1>
-    <p class="sub">Live hourly results with phase breakdown & competition highlights.</p>
+    <p class="sub">Live results with phase breakdown & competition highlights — updated twice daily.</p>
   </header>
 
   <main>
@@ -36,13 +36,13 @@
     <section>
       <h2>Notes</h2>
       <ul>
-        <li>Runner pushes <code>agi_benchmark_log.json</code> hourly (mirrored to Google Drive).</li>
+        <li>Runner pushes <code>agi_benchmark_log.json</code> twice daily (mirrored to Google Drive).</li>
         <li>If you see “No data yet”, refresh after the next run.</li>
       </ul>
     </section>
   </main>
 
-<footer><small>© SAVI — auto-updates hourly.</small></footer>
+<footer><small>© SAVI — auto-updates twice daily.</small></footer>
 
 <script>
 // IDs of Google Drive files that mirror the JSON assets.
@@ -118,8 +118,8 @@ async function loadData() {
   }
 }
 loadData();
-// refresh benchmark data every minute
-setInterval(loadData, 60_000);
+// refresh benchmark data every 12 hours
+setInterval(loadData, 12 * 60 * 60 * 1000);
 </script>
 <script>
 async function loadSystemGains() {
@@ -182,8 +182,8 @@ async function loadSystemGains() {
   }
 }
 loadSystemGains();
-// refresh system metrics every minute
-setInterval(loadSystemGains, 60_000);
+// refresh system metrics every 12 hours
+setInterval(loadSystemGains, 12 * 60 * 60 * 1000);
 </script>
 </body>
 </html>
