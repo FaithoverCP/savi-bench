@@ -36,20 +36,43 @@
     <section>
       <h2>Notes</h2>
       <ul>
-        <li>Runner pushes <code>data/agi_benchmark_log.json</code> hourly.</li>
+        <li>Runner pushes <code>agi_benchmark_log.json</code> hourly (mirrored to Google Drive).</li>
         <li>If you see “No data yet”, refresh after the next run.</li>
       </ul>
     </section>
   </main>
 
-  <footer><small>© SAVI — auto-updates hourly.</small></footer>
+<footer><small>© SAVI — auto-updates hourly.</small></footer>
 
 <script>
+// IDs of Google Drive files that mirror the JSON assets.
+// Replace these placeholders with your actual file IDs.
+const DRIVE_BENCHMARK_ID = 'BENCHMARK_FILE_ID';
+const DRIVE_METRICS_ID = 'METRICS_FILE_ID';
+
+// Helper to build a direct download URL for a Drive file
+const driveUrl = id => id ? `https://drive.google.com/uc?export=download&id=${id}` : '';
+
+// Attempt to fetch JSON from the first working URL in the list
+async function fetchFirstJSON(urls) {
+  for (const url of urls) {
+    if (!url) continue;
+    try {
+      const res = await fetch(url, { cache: 'no-store' });
+      if (res.ok) return res.json();
+    } catch (e) {
+      // try next URL
+    }
+  }
+  throw new Error('Missing data file');
+}
+
 async function loadData() {
   try {
-    const res = await fetch('data/agi_benchmark_log.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('Missing data file');
-    const log = await res.json();
+    const log = await fetchFirstJSON([
+      'data/agi_benchmark_log.json',
+      driveUrl(DRIVE_BENCHMARK_ID)
+    ]);
     if (!Array.isArray(log) || !log.length) throw new Error('Empty log');
 
     const now = Date.now(), dayAgo = now - 24*3600*1000;
@@ -95,13 +118,16 @@ async function loadData() {
   }
 }
 loadData();
+// refresh benchmark data every minute
+setInterval(loadData, 60_000);
 </script>
 <script>
 async function loadSystemGains() {
   try {
-    const res = await fetch('data/system_metrics.json', { cache: 'no-store' });
-    if (!res.ok) throw new Error('system_metrics.json not found');
-    const d = await res.json();
+    const d = await fetchFirstJSON([
+      'data/system_metrics.json',
+      driveUrl(DRIVE_METRICS_ID)
+    ]);
 
     // turn status dot green if this loads fine (works even if agi_benchmark_log is delayed)
     const status = document.querySelector('#status-dot');
@@ -156,6 +182,8 @@ async function loadSystemGains() {
   }
 }
 loadSystemGains();
+// refresh system metrics every minute
+setInterval(loadSystemGains, 60_000);
 </script>
 </body>
 </html>
