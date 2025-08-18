@@ -1,0 +1,8 @@
+{
+  "results_dir": "results",
+  "manifests_dir": "manifests",
+  "profiles": {
+    "savi_openai_62": {"description": "Placeholder profile"},
+    "savi_openai_63": {"description": "Placeholder profile"}
+  }
+}
