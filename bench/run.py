@@ -5,7 +5,7 @@ from datetime import datetime
 
 
 def load_config(path: str) -> dict:
-    """Load configuration from a JSON/YAML file."""
+    """Load configuration from a JSON file."""
     with open(path, "r", encoding="utf-8") as fh:
         return json.load(fh)
 
@@ -13,7 +13,7 @@ def load_config(path: str) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run SAVI benchmarks")
     parser.add_argument(
-        "--config", default="bench/config.yaml", help="Path to configuration file"
+        "--config", default="bench/config.json", help="Path to configuration file"
     )
     parser.add_argument(
         "--profile", required=True, help="Benchmark profile to execute"

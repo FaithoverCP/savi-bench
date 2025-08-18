@@ -12,7 +12,7 @@ def load_config(path: str) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate benchmark report")
     parser.add_argument(
-        "--config", default="bench/config.yaml", help="Path to configuration file"
+        "--config", default="bench/config.json", help="Path to configuration file"
     )
     parser.add_argument(
         "--output", default="reports/summary.json", help="Report output file"

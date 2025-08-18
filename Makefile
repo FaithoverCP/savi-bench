@@ -1,4 +1,4 @@
-CONFIG?=bench/config.yaml
+CONFIG?=bench/config.json
 PROFILE?=savi_openai_62
 
 .RECIPEPREFIX := >
