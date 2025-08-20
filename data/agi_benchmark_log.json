@@ -1,4 +1,26 @@
-[
-  {"timestamp":"2025-08-10T18:05:00Z","phase":"Warm-up","status":"pass","score":88.4,"retries":0,"trace":"bootstrap"},
-  {"timestamp":"2025-08-10T18:20:00Z","phase":"Competition","status":"pass","score":92.7,"retries":1,"trace":"sanity"}
+﻿[
+    {
+        "timestamp":  "2025-08-10T18:05:00Z",
+        "phase":  "Warm-up",
+        "status":  "pass",
+        "score":  88.4,
+        "retries":  0,
+        "trace":  "bootstrap"
+    },
+    {
+        "timestamp":  "2025-08-10T18:20:00Z",
+        "phase":  "Competition",
+        "status":  "pass",
+        "score":  92.7,
+        "retries":  1,
+        "trace":  "sanity"
+    },
+    {
+        "run_id":  "run-20250819-203153",
+        "phase":  "Competition",
+        "timestamp":  "2025-08-20T00:31:53Z",
+        "pass":  true,
+        "score":  92.7,
+        "notes":  "heartbeat to refresh dashboard"
+    }
 ]
