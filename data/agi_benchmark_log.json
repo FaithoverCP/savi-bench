@@ -22,5 +22,13 @@
         "pass":  true,
         "score":  92.7,
         "notes":  "heartbeat to refresh dashboard"
+    },
+    {
+        "run_id":  "manual-20250824-164309",
+        "profile":  "manual_check",
+        "timestamp":  "2025-08-24T20:43:09Z",
+        "tasks_total":  1,
+        "tasks_passed":  1,
+        "success_rate":  1
     }
 ]
