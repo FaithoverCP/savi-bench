@@ -2,8 +2,8 @@
 
 on:
   schedule:
-    - cron: '15 7 * * *'   # 07:15 UTC daily — change if you like
-  workflow_dispatch:       # allow manual run from the Actions tab
+    - cron: "15 7 * * *"     # 07:15 UTC daily
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -13,27 +13,45 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install jq
-        run: sudo apt-get update && sudo apt-get install -y jq
-      - name: Append heartbeat to rollup
+
+      - name: Append heartbeat to rollup (Python)
         shell: bash
         run: |
           set -euo pipefail
           PATH_JSON="data/agi_benchmark_log.json"
           mkdir -p data
-          ts=2025-08-24T16:48:29Z
-          runid="heartbeat-20250824-164829"
-          entry={run_id:$id, profile:"heartbeat", timestamp:$ts, tasks_total:0, tasks_passed:0, success_rate:1.0}
-          if [ -f "" ] && jq empty "" >/dev/null 2>&1; then
-            tmp=
-            jq --argjson e "" 'if type=="array" then . + [] else [.] + [] end' "" > ""
-            mv "" ""
-          else
-            printf '[\n%s\n]\n' "" > ""
-          fi
+          python - <<'PY'
+import json, os, datetime, sys
+p = "data/agi_benchmark_log.json"
+now = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+entry = {
+  "run_id": "heartbeat-" + datetime.datetime.utcnow().strftime("%Y%m%d-%H%M%S"),
+  "profile": "heartbeat",
+  "timestamp": now,
+  "tasks_total": 0,
+  "tasks_passed": 0,
+  "success_rate": 1.0,
+}
+data = []
+if os.path.exists(p):
+    try:
+        with open(p, "r", encoding="utf-8") as f:
+            obj = json.load(f)
+        if isinstance(obj, list):
+            data = obj
+        else:
+            data = [obj]
+    except Exception:
+        data = []
+data.append(entry)
+with open(p, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2)
+print("Appended heartbeat:", entry)
+PY
+
       - name: Commit & push
         run: |
-          git config user.name "github-actions"
+          git config user.name  "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
           git add data/agi_benchmark_log.json
           git commit -m "chore(heartbeat): daily timestamp bump" || echo "Nothing to commit"
