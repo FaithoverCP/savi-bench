@@ -1,0 +1,38 @@
+name: hourly-bench
+
+on:
+  push:
+    branches: ["main"]
+  schedule:
+    - cron: "0 * * * *"      # Top of every hour (UTC)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Run hourly bench and report
+        shell: bash
+        run: |
+          set -euo pipefail
+          make bench PROFILE=savi_openai_62
+          make bench PROFILE=savi_openai_63
+          make report
+
+      - name: Commit & push updated data
+        run: |
+          git config user.name  "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add data/agi_benchmark_log.json reports/summary.json results/*.json manifests/*.json || true
+          git commit -m "chore(bench): hourly results + dashboard data" || echo "Nothing to commit"
+          git push

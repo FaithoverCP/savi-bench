@@ -1,1 +1,29 @@
-﻿{ "metrics": [] }
+﻿{
+  "model": "savi-openai-62",
+  "metrics": {
+    "accuracy_pct": 91.2,
+    "inference_latency_ms": 45,
+    "train_time_hours": 12,
+    "compute_tflops": 120,
+    "energy_cost_per_million_usd": 1.23
+  },
+  "comparisons": [
+    {
+      "name": "baseline-A",
+      "accuracy_pct": 88.3,
+      "latency_ms": 52,
+      "train_hours": 18,
+      "tflops": 90,
+      "energy_cost_usd": 1.6
+    },
+    {
+      "name": "baseline-B",
+      "accuracy_pct": 90.1,
+      "latency_ms": 60,
+      "train_hours": 10,
+      "tflops": 110,
+      "energy_cost_usd": 1.4
+    }
+  ],
+  "updated_at": "2025-08-28T00:00:00Z"
+}

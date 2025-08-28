@@ -12,3 +12,6 @@ bench:
 
 report:
 >python -m bench.report --config $(CONFIG)
+
+serve:
+>python -m http.server 8000

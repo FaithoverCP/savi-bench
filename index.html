@@ -8,7 +8,13 @@
 </head>
 <body>
   <header>
-    <h1>🔴 SAVI Benchmarks</h1>
+    <h1>
+      <span class="status">
+        <span id="status-dot" class="status-dot" style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#95a5a6;vertical-align:middle"></span>
+        <span id="status-text" class="status-text">Status: loading</span>
+      </span>
+      SAVI Benchmarks
+    </h1>
     <p class="sub">Live hourly results with phase breakdown & competition highlights.</p>
   </header>
 
@@ -105,8 +111,10 @@ async function loadSystemGains() {
     const d = await res.json();
 
     // turn status dot green if this loads fine (works even if agi_benchmark_log is delayed)
-    const status = document.querySelector('#status-dot');
-    if (status) status.style.background = '#2ecc71';
+    const statusDot = document.querySelector('#status-dot');
+    const statusText = document.querySelector('#status-text');
+    if (statusDot) statusDot.style.background = '#2ecc71';
+    if (statusText) statusText.textContent = 'Status: live';
 
     // find a root container; fall back to body
     const root = document.querySelector('#root') || document.body;
@@ -154,6 +162,10 @@ async function loadSystemGains() {
     root.appendChild(card);
   } catch (e) {
     console.warn('System gains not loaded:', e.message);
+    const statusDot = document.querySelector('#status-dot');
+    const statusText = document.querySelector('#status-text');
+    if (statusDot) statusDot.style.background = '#95a5a6';
+    if (statusText) statusText.textContent = 'Status: delayed';
   }
 }
 loadSystemGains();
