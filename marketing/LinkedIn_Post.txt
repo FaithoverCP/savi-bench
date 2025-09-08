@@ -1,0 +1,8 @@
+🚀 While others test once and claim victory, SAVI tests every hour — and publishes results you can verify.
+
+We just shipped DS005: a 10,000‑agent run with a strict $250 budget cap, complete with proof pack and integrity hashes.
+
+Replay it yourself or inspect the manifests and logs:
+https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908
+
+#AI #Benchmarking #Reproducibility #Transparency #SAVI
