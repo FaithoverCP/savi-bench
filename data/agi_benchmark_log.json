@@ -1,34 +1,102 @@
-﻿[
-    {
-        "timestamp":  "2025-08-10T18:05:00Z",
-        "phase":  "Warm-up",
-        "status":  "pass",
-        "score":  88.4,
-        "retries":  0,
-        "trace":  "bootstrap"
-    },
-    {
-        "timestamp":  "2025-08-10T18:20:00Z",
-        "phase":  "Competition",
-        "status":  "pass",
-        "score":  92.7,
-        "retries":  1,
-        "trace":  "sanity"
-    },
-    {
-        "run_id":  "run-20250819-203153",
-        "phase":  "Competition",
-        "timestamp":  "2025-08-20T00:31:53Z",
-        "pass":  true,
-        "score":  92.7,
-        "notes":  "heartbeat to refresh dashboard"
-    },
-    {
-        "run_id":  "manual-20250824-164309",
-        "profile":  "manual_check",
-        "timestamp":  "2025-08-24T20:43:09Z",
-        "tasks_total":  1,
-        "tasks_passed":  1,
-        "success_rate":  1
-    }
+[
+  {
+    "run_id": "savi_openai_63-2025-09-08T15:12:45Z-warm-up",
+    "profile": "savi_openai_63",
+    "phase": "Warm-up",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 82.74,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-08T15:12:45Z-strength",
+    "profile": "savi_openai_63",
+    "phase": "Strength",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 76.22,
+    "retries": 1,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-08T15:12:45Z-endurance",
+    "profile": "savi_openai_63",
+    "phase": "Endurance",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 79.86,
+    "retries": 1,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-08T15:12:45Z-competition",
+    "profile": "savi_openai_63",
+    "phase": "Competition",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 90.95,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-08T15:12:45Z-warm-up",
+    "profile": "savi_openai_62",
+    "phase": "Warm-up",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 81.04,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-08T15:12:45Z-strength",
+    "profile": "savi_openai_62",
+    "phase": "Strength",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 79.41,
+    "retries": 1,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-08T15:12:45Z-endurance",
+    "profile": "savi_openai_62",
+    "phase": "Endurance",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 60.03,
+    "retries": 1,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-08T15:12:45Z-competition",
+    "profile": "savi_openai_62",
+    "phase": "Competition",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 96.2,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-08T15:12:45Z",
+    "profile": "savi_openai_62",
+    "phase": "Competition",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 0.0,
+    "retries": 0,
+    "trace": "report-import"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-08T15:12:45Z",
+    "profile": "savi_openai_63",
+    "phase": "Competition",
+    "timestamp": "2025-09-08T15:12:45Z",
+    "status": "pass",
+    "score": 0.0,
+    "retries": 0,
+    "trace": "report-import"
+  }
 ]
