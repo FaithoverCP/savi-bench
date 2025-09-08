@@ -1,0 +1,5 @@
+[
+  {"id":"t1","phase":"Strength","prompt":"Compute 21 * 2 and answer with just the number.","answer":"42:0","scorer":"approx"},
+  {"id":"t2","phase":"Competition","prompt":"Output a string containing an email-like pattern.","answer":"[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}","scorer":"regex"}
+]
+

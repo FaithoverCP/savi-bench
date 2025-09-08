@@ -1,0 +1,6 @@
+[
+  {"id":"r1","phase":"Warm-up","prompt":"Say 'hello world' exactly.","answer":"hello world","scorer":"exact"},
+  {"id":"r2","phase":"Strength","prompt":"Provide the word 'SAVI' somewhere in your answer.","answer":"SAVI","scorer":"contains"},
+  {"id":"r3","phase":"Endurance","prompt":"Return a JSON object with key answer and value 42.","answer":"{\n  \"answer\": 42\n}","scorer":"json-equal"}
+]
+
