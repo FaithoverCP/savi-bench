@@ -6,3 +6,5 @@ Public, rolling SAVI Benchmarks. Hourly AGI cycle (Warm-up, Strength, Endurance,
 - Release: https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908
 - Assets: `proof_pack_FULL.tgz`, `sha256sums.txt`, `latency_summary.csv`, `latest.html`
 - Highlights: 10k-agent run with budget cap enforcement (`stop_reason=budget_cap_reached_250.0`).
+
+- Getting started: docs/GETTING_STARTED.md

@@ -8,23 +8,25 @@ import requests
 class SaviClient:
     """Minimal client for an OpenAI-compatible chat endpoint.
 
-    Expects environment variables:
-      - SAVI_API_BASE: e.g. https://api.your-savi-host/v1/chat/completions
-        or a base like https://api.your-savi-host/v1 (then set SAVI_API_PATH)
-      - SAVI_API_KEY: bearer token
-      - SAVI_MODEL:    model name
-      - SAVI_API_PATH: optional, defaults to /chat/completions
+    Supported environment variables (prefer OPENAI_*):
+      - OPENAI_BASE_URL or SAVI_API_BASE: e.g. https://api.openai.com/v1 or full /chat/completions
+      - OPENAI_API_KEY  or SAVI_API_KEY: bearer token
+      - OPENAI_MODEL    or SAVI_MODEL:   model name (default: gpt-4o)
+      - SAVI_API_PATH:  optional, defaults to /chat/completions
     """
 
     def __init__(self) -> None:
-        base = os.getenv("SAVI_API_BASE", "").rstrip("/")
+        base = os.getenv("OPENAI_BASE_URL") or os.getenv("SAVI_API_BASE", "")
+        base = base.rstrip("/")
         path = os.getenv("SAVI_API_PATH", "/chat/completions")
         if base.endswith("/chat/completions"):
             self.url = base
-        else:
+        elif base:
             self.url = f"{base}{path}"
-        self.api_key = os.getenv("SAVI_API_KEY", "")
-        self.model = os.getenv("SAVI_MODEL", "savi")
+        else:
+            self.url = ""
+        self.api_key = os.getenv("OPENAI_API_KEY") or os.getenv("SAVI_API_KEY", "")
+        self.model = os.getenv("OPENAI_MODEL") or os.getenv("SAVI_MODEL") or "gpt-4o"
 
     def chat(self, prompt: str, system: str = None, max_tokens: int = 256, temperature: float = 0.2) -> Tuple[str, float, Dict[str, Any]]:
         headers = {
