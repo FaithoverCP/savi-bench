@@ -37,6 +37,8 @@ jobs:
           fi
           # Include supporting docs
           [ -d docs ] && cp -rv docs/* public/ || true
+          # Include the reports directory so deep links like /reports/latest.html work
+          [ -d reports ] && mkdir -p public/reports && cp -v reports/latest.html public/reports/latest.html || true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: public
