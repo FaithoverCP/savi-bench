@@ -17,7 +17,10 @@ class SaviClient:
 
     def __init__(self) -> None:
         base = os.getenv("OPENAI_BASE_URL") or os.getenv("SAVI_API_BASE", "")
-        base = base.rstrip("/")
+        base = base.rstrip("/") if base else ""
+        # Default to OpenAI public base if API key is present but no base provided
+        if not base and (os.getenv("OPENAI_API_KEY") or os.getenv("SAVI_API_KEY")):
+            base = "https://api.openai.com/v1"
         path = os.getenv("SAVI_API_PATH", "/chat/completions")
         if base.endswith("/chat/completions"):
             self.url = base

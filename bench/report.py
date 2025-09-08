@@ -89,6 +89,19 @@ table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #dd
     out_path.write_text(html, encoding="utf-8")
 
 
+def _maybe_load_latest_run_manifest(results_dir: Path, manifests_dir: Path) -> Dict[str, Any]:
+    latest = None
+    if manifests_dir.exists():
+        cands = sorted(manifests_dir.glob("run-*.json"), key=lambda p: p.stat().st_mtime, reverse=True)
+        latest = cands[0] if cands else None
+    if latest and latest.exists():
+        try:
+            return json.loads(latest.read_text(encoding="utf-8"))
+        except Exception:
+            return {}
+    return {}
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Generate benchmark report")
     # Mode A: legacy summary generation from config/results
@@ -106,6 +119,14 @@ def main() -> None:
         lats = []
         total = 0
         success = 0
+        # Try to augment with latest run manifest metadata
+        latest_manifest = _maybe_load_latest_run_manifest(Path("results"), Path("manifests"))
+        extra = {}
+        for k in ("mode", "model", "api_base", "git_commit", "budget_usd", "stop_reason", "processed_tasks"):
+            if k in latest_manifest:
+                extra[k] = latest_manifest[k]
+        # Read JSONL rows to list and add metadata
+        rows: List[Dict[str, Any]] = []
         for row in _iter_jsonl(src):
             lat = row.get("latency_ms")
             try:
@@ -124,6 +145,10 @@ def main() -> None:
                 total += 1
                 if ok:
                     success += 1
+            # Write-through metadata so dashboard can badge runs
+            for k, v in extra.items():
+                row.setdefault(k, v)
+            rows.append(row)
         lats.sort()
         metrics = {
             "total": total,
@@ -133,8 +158,25 @@ def main() -> None:
             "p95_ms": f"{_percentile(lats,95):.1f}" if lats else "",
             "p99_ms": f"{_percentile(lats,99):.1f}" if lats else "",
         }
-        _write_simple_html(metrics, Path(args.out_html))
+        _write_simple_html(metrics | extra, Path(args.out_html))
         print(f"Wrote HTML report to {args.out_html}")
+        # Also update the dashboard data JSON with these rows
+        html_data_path = Path("data/agi_benchmark_log.json")
+        html_data_path.parent.mkdir(parents=True, exist_ok=True)
+        existing = _load_json_array(html_data_path)
+        def key_of(e: Dict[str, Any]):
+            return e.get("run_id") or (e.get("profile"), e.get("timestamp"), e.get("phase"))
+        seen = {key_of(e) for e in existing}
+        new_entries: List[Dict[str, Any]] = []
+        for rec in rows:
+            k = key_of(rec)
+            if k in seen:
+                continue
+            new_entries.append(rec)
+            seen.add(k)
+        merged = existing + new_entries
+        html_data_path.write_text(json.dumps(merged, indent=2), encoding="utf-8")
+        print(f"Updated {html_data_path} (+{len(new_entries)})")
         return
 
     config = load_config(args.config)

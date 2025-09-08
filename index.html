@@ -20,6 +20,7 @@
   </header>
 
   <main>
+    <div id="badges" style="font-size:0.9em;color:#4b5563;margin:8px 0 12px 0;"></div>
     <section class="cards" id="summary">
       <div class="card"><h3>Total Runs (24h)</h3><div class="num" id="totalRuns">—</div></div>
       <div class="card"><h3>Pass Rate</h3><div class="num" id="passRate">—</div></div>
@@ -72,7 +73,28 @@ async function loadData() {
     document.getElementById('totalRuns').textContent = total || '0';
     document.getElementById('passRate').textContent = passRate;
     document.getElementById('avgScore').textContent = avgScore;
-    document.getElementById('lastPhase').textContent = last.phase || '—';
+    document.getElementById('lastPhase').textContent = last.phase || '-';
+
+    // badges (mode/model/budget/stop/processed/commit)
+    const bd = document.getElementById('badges');
+    if (bd && last) {
+      const mode = last.mode || 'synthetic';
+      const model = last.model || '-';
+      const base = last.api_base || '';
+      const commit = (last.git_commit||'').slice(0,7);
+      const budget = last.budget_usd!=null ? `$${last.budget_usd}`: '-';
+      const stop = last.stop_reason || '-';
+      const proc = last.processed_tasks!=null ? String(last.processed_tasks) : '-';
+      const pill = (txt,bg='#eee')=>`<span style="background:${bg};padding:2px 6px;border-radius:4px;margin-right:6px">${txt}</span>`;
+      bd.innerHTML = [
+        pill(mode, '#eef'), pill(`model: ${model}`,'#efe'), pill(`budget: ${budget}`,'#fee'),
+        pill(`stop: ${stop}`,'#fef'), pill(`processed: ${proc}`,'#eef'),
+        commit?pill(`commit: ${commit}`,'#eee'):''
+      ].join(' ');
+      if (base) {
+        bd.title = `api_base: ${base}`;
+      }
+    }
 
     const phases = ['Warm-up','Strength','Endurance','Competition'];
     const stats = {}; phases.forEach(p => stats[p]={runs:0,pass:0,score:0});
