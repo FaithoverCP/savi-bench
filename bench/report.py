@@ -69,15 +69,28 @@ def _percentile(sorted_vals, p):
 
 def _write_simple_html(metrics: Dict[str, Any], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    # Optional banner block
+    banner_text = metrics.get("banner_text")
+    banner_link = metrics.get("banner_link")
+    if banner_text:
+        if banner_link:
+            banner_html = f'<div class="banner"><a href="{banner_link}" target="_blank" rel="noopener">{banner_text}</a></div>'
+        else:
+            banner_html = f'<div class="banner"><span>{banner_text}</span></div>'
+    else:
+        banner_html = ""
     html = f"""<!doctype html>
 <html lang=\"en\"><head><meta charset=\"utf-8\"><title>SAVI Report</title>
-<style>body{{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:2rem;line-height:1.4}}
+<meta property=\"og:title\" content=\"SAVI Bench – Latest Report\">\n<meta property=\"og:description\" content=\"{metrics.get('banner_text','10,000 agents · $250 cap · DS005 proof pack')}\">\n<meta property=\"og:type\" content=\"website\">\n<meta name=\"twitter:card\" content=\"summary_large_image\">\n<style>body{{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:2rem;line-height:1.4}}
 table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #ddd}}
 .badges span{{display:inline-block;background:#f2f4f7;border-radius:6px;padding:4px 8px;margin-right:6px;font-size:.85rem;color:#333}}
 .links a{{margin-right:12px}}
+.banner{{margin:.6rem 0 1rem;padding:.5rem .75rem;border:1px solid #e5e7eb;border-radius:.5rem;font-size:.95rem;background:#fafafa}}
+.banner::before{{content:'⚡ ';}}
 </style></head>
 <body>
 <h1>SAVI Report</h1>
+{banner_html}
 <div class=\"badges\">
   <span>mode: {metrics.get('mode','n/a')}</span>
   <span>latency: {metrics.get('latency_source','n/a')}</span>
