@@ -1,9 +1,11 @@
-# Deploy static site to GitHub Pages
-name: Deploy static content to Pages
-
+name: Publish DS005 Report to Pages
 on:
   push:
-    branches: ["main"]
+    branches: [ main ]
+    paths:
+      - 'reports/latest.html'
+      - 'docs/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -12,20 +14,41 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  group: 'pages'
+  cancel-in-progress: true
 
 jobs:
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v5
+      - name: Prepare site
+        run: |
+          set -euo pipefail
+          mkdir -p public
+          # Include any docs as static pages
+          if [ -d docs ]; then cp -r docs/* public/ || true; fi
+          # If a fresh report exists, make it the homepage; else show a helpful landing
+          if [ -f reports/latest.html ]; then
+            cp reports/latest.html public/index.html
+          else
+            cat > public/index.html << 'HTML'
+            <!doctype html>
+            <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+            <title>SAVI Bench — Reports</title>
+            <style>body{font:16px/1.5 system-ui,Segoe UI,Arial,sans-serif;margin:2rem;max-width:900px}</style></head>
+            <body>
+              <h1>SAVI Bench</h1>
+              <p>Latest report not yet published to Pages. See docs or the DS005 release:</p>
+              <ul>
+                <li><a href="./docs/index.html">Docs Index</a></li>
+                <li><a href="https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908">DS005 Release</a></li>
+              </ul>
+            </body></html>
+            HTML
+          fi
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'   # serve repo root
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          path: public
+      - uses: actions/deploy-pages@v4
+
