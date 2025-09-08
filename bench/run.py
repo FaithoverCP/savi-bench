@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import List, Dict, Any, Tuple
+import subprocess
+import hashlib
 
 SaviClient = None  # lazy import to avoid hard dependency on requests
 
@@ -78,28 +80,40 @@ def _gen_phase_entries(profile: str, timestamp: str) -> List[Dict[str, Any]]:
     return entries
 
 
+def _sha256_text(text: str) -> str:
+    h = hashlib.sha256()
+    h.update(text.encode("utf-8"))
+    return h.hexdigest()
+
+
 # ---- Real suite runner ----
 def _word_count(s: str) -> int:
     return len([w for w in s.strip().split() if w])
 
 
 def _score_task(prompt: str, expected: str, got: str, kind: str) -> Tuple[float, str]:
-    """Return (score_0_100, note)."""
+    """Return (score_0_100, note). Delegates to bench.grade when available."""
     try:
-        if kind == "exact":
-            return (100.0 if got.strip() == expected.strip() else 0.0, "exact")
-        if kind == "exact-case":
-            return (100.0 if got == expected else 0.0, "exact-case")
-        if kind == "contains":
-            return (100.0 if expected.lower() in got.lower() else 0.0, "contains")
-        if kind == "number":
-            import re
-            g = re.findall(r"[-+]?[0-9]*\.?[0-9]+", got)
-            return (100.0 if expected in g else 0.0, f"numbers={g}")
-        if kind == "word-count":
-            return (100.0 if str(_word_count(got)) == expected else 0.0, f"wc={_word_count(got)}")
-    except Exception as e:  # pragma: no cover
-        return (0.0, f"error:{e}")
+        from . import grade as _grade  # type: ignore
+        score, note = _grade.score(prompt=prompt, expected=expected, got=got, kind=kind)
+        return float(score), str(note)
+    except Exception:
+        # Fallback simple scorers
+        try:
+            if kind == "exact":
+                return (100.0 if got.strip() == expected.strip() else 0.0, "exact")
+            if kind == "exact-case":
+                return (100.0 if got == expected else 0.0, "exact-case")
+            if kind == "contains":
+                return (100.0 if expected.lower() in got.lower() else 0.0, "contains")
+            if kind == "number":
+                import re
+                g = re.findall(r"[-+]?[0-9]*\.?[0-9]+", got)
+                return (100.0 if expected in g else 0.0, f"numbers={g}")
+            if kind == "word-count":
+                return (100.0 if str(_word_count(got)) == expected else 0.0, f"wc={_word_count(got)}")
+        except Exception as e:  # pragma: no cover
+            return (0.0, f"error:{e}")
     return (0.0, "unknown-scorer")
 
 
@@ -145,6 +159,7 @@ def _run_real(profile: str, suite: List[Dict[str, Any]]) -> Tuple[List[Dict[str,
                 "score": score,
                 "latency_ms": round(latency_ms, 1),
                 "note": note,
+                "ok": bool(score >= 60.0),
             })
             by_phase.setdefault(phase, []).append({"score": score, "latency_ms": latency_ms})
         except Exception as e:  # pragma: no cover
@@ -246,7 +261,13 @@ def main() -> None:
     timestamp = _iso_now()
 
     # Choose mode: real only if SAVI_API_BASE is configured; else synthetic
-    run_real = bool(os.getenv("SAVI_API_BASE"))
+    # Determine mode: real if OpenAI/SAVI key or base present
+    run_real = bool(
+        os.getenv("OPENAI_API_KEY")
+        or os.getenv("SAVI_API_KEY")
+        or os.getenv("OPENAI_BASE_URL")
+        or os.getenv("SAVI_API_BASE")
+    )
     if run_real:
         suite = _load_suite(config, args.profile)
         structured, task_traces = _run_real(args.profile, suite)
@@ -254,6 +275,13 @@ def main() -> None:
         detail_json = results_dir / f"tasks-{args.profile}-{timestamp.replace(':','').replace('-','').replace('T','').replace('Z','')}.json"
         detail_json.write_text(json.dumps(task_traces, indent=2), encoding="utf-8")
     else:
+        # Seed reproducibility if provided
+        seed = os.getenv("RUN_SEED")
+        if seed:
+            try:
+                random.seed(int(seed))
+            except Exception:
+                random.seed(seed)
         structured = _gen_phase_entries(args.profile, timestamp)
         task_traces = []
 
@@ -302,11 +330,58 @@ def main() -> None:
             stop_reason = f"budget_cap_reached_{args.budget_usd}"
             total_cost_usd = None
 
+    # Gather reproducibility + env metadata
+    try:
+        git_commit = (
+            subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=".", text=True).strip()
+        )
+    except Exception:
+        git_commit = None
+    try:
+        cfg_text = Path(args.config).read_text(encoding="utf-8")
+        config_hash = _sha256_text(cfg_text)
+    except Exception:
+        config_hash = None
+
+    # Compute aggregate metrics
+    def _metrics_from_traces(traces: List[Dict[str, Any]]) -> Dict[str, Any]:
+        lats = [float(t["latency_ms"]) for t in traces if isinstance(t.get("latency_ms"), (int, float))]
+        lats.sort()
+        def pct(p):
+            if not lats:
+                return None
+            k = (len(lats) - 1) * (p / 100.0)
+            f = int(k)
+            c = min(f + 1, len(lats) - 1)
+            if f == c:
+                return float(lats[f])
+            return float(lats[f] * (c - k) + lats[c] * (k - f))
+        total = sum(1 for t in traces if "ok" in t)
+        success = sum(1 for t in traces if t.get("ok") is True)
+        return {
+            "p50_ms": round(pct(50), 1) if lats else None,
+            "p95_ms": round(pct(95), 1) if lats else None,
+            "p99_ms": round(pct(99), 1) if lats else None,
+            "success_rate": round(success / total, 4) if total else None,
+            "n_tasks": total or None,
+        }
+
+    metrics = _metrics_from_traces(task_traces) if task_traces else None
+
+    # Client env
+    api_base = os.getenv("OPENAI_BASE_URL") or os.getenv("SAVI_API_BASE")
+    model_name = os.getenv("OPENAI_MODEL") or os.getenv("SAVI_MODEL")
+
     manifest = {
         "profile": args.profile,
         "timestamp": timestamp,
         "config": args.config,
+        "config_hash": config_hash,
         "phases": PHASES,
+        "mode": "real" if run_real else "synthetic",
+        "git_commit": git_commit,
+        "api_base": api_base,
+        "model": model_name,
         "concurrency": args.concurrency,
         "pods": {"count": pods_count, "size": pods_size} if (pods_count or pods_size) else None,
         "target_tasks": target_tasks,
@@ -314,6 +389,7 @@ def main() -> None:
         "budget_usd": args.budget_usd,
         "total_cost_usd": total_cost_usd,
         "stop_reason": stop_reason,
+        "metrics": metrics,
         "artifacts": {
             "txt": str(result_file),
             "json": str(result_json),
