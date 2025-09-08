@@ -2,7 +2,20 @@
   "results_dir": "results",
   "manifests_dir": "manifests",
   "profiles": {
-    "savi_openai_62": {"description": "Placeholder profile"},
-    "savi_openai_63": {"description": "Placeholder profile"}
+    "savi_openai_62": {
+      "description": "SAVI model 62 hourly",
+      "mode": "real",
+      "suite": "bench/suites/demo.json"
+    },
+    "savi_openai_63": {
+      "description": "SAVI model 63 hourly",
+      "mode": "real",
+      "suite": "bench/suites/demo.json"
+    },
+    "savi_openai_1000": {
+      "description": "DS005 run profile (10k via pods 10x1000)",
+      "mode": "real",
+      "suite": "bench/suites/demo.json"
+    }
   }
 }

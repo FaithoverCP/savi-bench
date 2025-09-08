@@ -1,0 +1,14 @@
+[
+  {"id": "wu-1", "phase": "Warm-up",   "prompt": "Reply exactly with: ready", "answer": "ready", "scorer": "exact"},
+  {"id": "wu-2", "phase": "Warm-up",   "prompt": "Return the string OK",     "answer": "OK",    "scorer": "exact-case"},
+
+  {"id": "st-1", "phase": "Strength",  "prompt": "What is 123 + 456?",         "answer": "579",   "scorer": "number"},
+  {"id": "st-2", "phase": "Strength",  "prompt": "Sort ascending: 4 1 3 2",    "answer": "1 2 3 4", "scorer": "contains"},
+
+  {"id": "en-1", "phase": "Endurance",  "prompt": "Count the letters in 'savi benchmark' (no spaces).", "answer": "13", "scorer": "number"},
+  {"id": "en-2", "phase": "Endurance",  "prompt": "Give a short 12-word sentence about reliability.",   "answer": "12", "scorer": "word-count"},
+
+  {"id": "cp-1", "phase": "Competition","prompt": "In one line, explain why benchmarking matters.",     "answer": "benchmark", "scorer": "contains"},
+  {"id": "cp-2", "phase": "Competition","prompt": "If revenue grows 20% from 100 to X, what is X?",    "answer": "120", "scorer": "number"}
+]
+
