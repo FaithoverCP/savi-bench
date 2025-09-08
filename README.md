@@ -3,6 +3,10 @@ Public, rolling SAVI Benchmarks. Hourly AGI cycle (Warm-up, Strength, Endurance,
 
 Live, verifiable benchmark. Reproduce a 10k-agent run with a $250 cap; verify with SHA256; view human-readable results in `reports/latest.html`.
 
+## Try it now
+- Live Report: https://faithovercp.github.io/savi-bench/
+- DS005 Proof Pack: https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908
+
 ## Latest DS005 Proof
 
 - Release: https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908
