@@ -16,6 +16,7 @@
       SAVI Benchmarks
     </h1>
     <p class="sub">Live hourly results with phase breakdown & competition highlights.</p>
+    <p class="sub" id="liveMeta">Updated: <span id="updatedAt">-</span> · Next: <span id="nextRefresh">-</span></p>
   </header>
 
   <main>
@@ -101,7 +102,31 @@ async function loadData() {
   }
 }
 loadData();
-setInterval(loadData, 60_000);
+</script>
+<script>
+// Live scheduler
+let REFRESH_MS = 15_000;          // 15s when tab focused
+let REFRESH_HIDDEN_MS = 60_000;   // 60s when tab hidden
+let nextTickAt = 0;
+let tickTimer = null;
+
+function scheduleNextTick() {
+  if (tickTimer) clearTimeout(tickTimer);
+  const wait = document.hidden ? REFRESH_HIDDEN_MS : REFRESH_MS;
+  nextTickAt = Date.now() + wait;
+  tickTimer = setTimeout(() => { loadData(); loadSystemGains(); scheduleNextTick(); }, wait);
+}
+
+function updateCountdown() {
+  const el = document.getElementById('nextRefresh');
+  if (!el || !nextTickAt) return;
+  const d = Math.max(0, nextTickAt - Date.now());
+  const s = Math.round(d/1000);
+  el.textContent = s + 's';
+}
+
+document.addEventListener('visibilitychange', scheduleNextTick);
+setInterval(updateCountdown, 1000);
 </script>
 <script>
 async function loadSystemGains() {
@@ -115,6 +140,8 @@ async function loadSystemGains() {
     const statusText = document.querySelector('#status-text');
     if (statusDot) statusDot.style.background = '#2ecc71';
     if (statusText) statusText.textContent = 'Status: live';
+    const updatedAt = document.getElementById('updatedAt');
+    if (updatedAt) updatedAt.textContent = new Date().toLocaleTimeString();
 
     // find a root container; fall back to body
     const root = document.querySelector('#root') || document.body;
@@ -169,7 +196,13 @@ async function loadSystemGains() {
   }
 }
 loadSystemGains();
-setInterval(loadSystemGains, 60_000);
+</script>
+<script>
+// Kick off live loop after initial loads
+window.addEventListener('load', () => {
+  // Initial data pulls happened above; plan the periodic refreshes here
+  scheduleNextTick();
+});
 </script>
 </body>
 </html>
