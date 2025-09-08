@@ -1,0 +1,13 @@
+[2025-09-04T23:00:01.9696553-04:00] SAVI update start
+[2025-09-04T23:00:02.0295471-04:00] server=up
+[2025-09-04T23:00:02.0316589-04:00] >>> python -m bench.run --config bench/config.json --profile savi_openai_62
+Wrote results\savi_openai_62.txt, results\savi_openai_62-20250905030002.json and manifests\savi_openai_62.json
+[2025-09-04T23:00:02.1071008-04:00] >>> python -m bench.run --config bench/config.json --profile savi_openai_63
+Wrote results\savi_openai_63.txt, results\savi_openai_63-20250905030002.json and manifests\savi_openai_63.json
+[2025-09-04T23:00:02.1670294-04:00] >>> python -m bench.report --config bench/config.json
+C:\Users\mbgin\OneDrive\Documents\GitHub\savi-bench\bench\report.py:64: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  "generated": datetime.utcnow().isoformat(),
+C:\Users\mbgin\OneDrive\Documents\GitHub\savi-bench\bench\report.py:103: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  rec.setdefault("timestamp", datetime.utcnow().isoformat() + "Z")
+Wrote report to reports\summary.json and updated data\agi_benchmark_log.json (+10)
+[2025-09-04T23:00:02.2532646-04:00] SAVI update done
