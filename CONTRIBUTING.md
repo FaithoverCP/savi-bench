@@ -1,5 +1,29 @@
 # Contributing to SAVI Bench
 
+## Contributor Quick Start
+
+If you only need the essentials:
+
+1. Setup Environment
+   - Windows: `py -3.11 -m venv .venv && .\\.venv\\Scripts\\Activate.ps1`
+   - macOS/Linux: `python3.11 -m venv .venv && source .venv/bin/activate`
+
+2. Run a Demo
+   - `python -m bench.run --config bench/config.json --profile savi_openai_1000 --budget-usd 250`
+   - `python -m bench.report results/latest.jsonl --out reports/latest.html`
+
+3. Proof Pack
+   - `python tools/summarize_and_pack.py`
+   - Verify with `./tools/verify.ps1 -Dir ./dist` or `sha256sum`
+
+4. Merging JSON Logs
+   - Already configured via `.gitattributes` + `tools/merge_json_log.py`
+   - Conflicts resolve automatically by appending unique `run_id`s
+
+5. Security
+   - Never commit API keys, secrets, or raw headers
+   - Manifests and reports are scrubbed automatically
+
 Thanks for helping improve SAVI Bench. A few notes to keep merges smooth and results reproducible.
 
 ## JSON Log Merge Driver (data/agi_benchmark_log.json)
