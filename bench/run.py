@@ -170,7 +170,8 @@ def _run_real(profile: str, suite: List[Dict[str, Any]]) -> Tuple[List[Dict[str,
                 "expected": expected,
                 "error": str(e),
                 "score": 0.0,
-                "latency_ms": None,
+                "latency_ms": 0.0,
+                "ok": False,
             })
             by_phase.setdefault(phase, []).append({"score": 0.0, "latency_ms": 0.0})
 
@@ -356,14 +357,17 @@ def main() -> None:
             if f == c:
                 return float(lats[f])
             return float(lats[f] * (c - k) + lats[c] * (k - f))
-        total = sum(1 for t in traces if "ok" in t)
+        total = len(traces)
         success = sum(1 for t in traces if t.get("ok") is True)
+        fail = total - success
         return {
             "p50_ms": round(pct(50), 1) if lats else None,
             "p95_ms": round(pct(95), 1) if lats else None,
             "p99_ms": round(pct(99), 1) if lats else None,
             "success_rate": round(success / total, 4) if total else None,
             "n_tasks": total or None,
+            "n_ok": success,
+            "n_fail": fail,
         }
 
     metrics = _metrics_from_traces(task_traces) if task_traces else None
