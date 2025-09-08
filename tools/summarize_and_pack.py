@@ -127,8 +127,16 @@ def summarize_latency_and_success(jsonl_path: Path, out_csv: Path) -> Dict[str, 
     total = 0
     success = 0
     for obj in _iter_jsonl(jsonl_path):
-        # latency
+        # latency (prefer explicit latency_ms; else parse from trace string)
         lat = obj.get("latency_ms")
+        if lat is None:
+            tr = obj.get("trace") or ""
+            m = __import__("re").search(r"avg\s+latency\s*=\s*([0-9]+(?:\.[0-9]+)?)ms", str(tr))
+            if m:
+                try:
+                    lat = float(m.group(1))
+                except Exception:
+                    lat = None
         try:
             if lat is not None:
                 lats.append(float(lat))

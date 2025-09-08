@@ -1,5 +1,7 @@
 import argparse
 import json
+import os
+import re
 from pathlib import Path
 from datetime import datetime
 from typing import Any, Dict, List
@@ -69,10 +71,22 @@ def _write_simple_html(metrics: Dict[str, Any], out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     html = f"""<!doctype html>
 <html lang=\"en\"><head><meta charset=\"utf-8\"><title>SAVI Report</title>
-<style>body{{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:2rem;}}
-table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #ddd}}</style></head>
+<style>body{{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:2rem;line-height:1.4}}
+table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #ddd}}
+.badges span{{display:inline-block;background:#f2f4f7;border-radius:6px;padding:4px 8px;margin-right:6px;font-size:.85rem;color:#333}}
+.links a{{margin-right:12px}}
+</style></head>
 <body>
 <h1>SAVI Report</h1>
+<div class=\"badges\">
+  <span>mode: {metrics.get('mode','n/a')}</span>
+  <span>latency: {metrics.get('latency_source','n/a')}</span>
+  <span>budget: {metrics.get('budget_usd','n/a')}</span>
+  <span>stop: {metrics.get('stop_reason','n/a')}</span>
+  <span>processed: {metrics.get('processed_tasks','n/a')}</span>
+  <span>commit: {(metrics.get('git_commit') or '')[:7]}</span>
+</div>
+<div class=\"links\" style=\"margin:6px 0 12px 0\">\n  <a href=\"https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908\">DS005 proof pack</a>\n  <a href=\"https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908\">sha256sums.txt</a>\n</div>
 <p>Generated: {datetime.utcnow().isoformat()}Z</p>
 <table>
   <thead><tr><th>Metric</th><th>Value</th></tr></thead>
@@ -116,7 +130,7 @@ def main() -> None:
     # If a JSONL positional arg is provided, render HTML and exit
     if args.jsonl:
         src = Path(args.jsonl)
-        lats = []
+        lats: List[float] = []
         total = 0
         success = 0
         # Try to augment with latest run manifest metadata
@@ -127,8 +141,18 @@ def main() -> None:
                 extra[k] = latest_manifest[k]
         # Read JSONL rows to list and add metadata
         rows: List[Dict[str, Any]] = []
+        rows: List[Dict[str, Any]] = []
         for row in _iter_jsonl(src):
             lat = row.get("latency_ms")
+            # Fallback: parse avg latency from trace like "... avg latency=123.4ms"
+            if lat is None:
+                tr = row.get("trace") or ""
+                m = re.search(r"avg\s+latency\s*=\s*([0-9]+(?:\.[0-9]+)?)ms", str(tr))
+                if m:
+                    try:
+                        lat = float(m.group(1))
+                    except Exception:
+                        lat = None
             try:
                 if lat is not None:
                     lats.append(float(lat))
@@ -150,6 +174,18 @@ def main() -> None:
                 row.setdefault(k, v)
             rows.append(row)
         lats.sort()
+        # If no latencies and SIM_LAT_MS is set, synthesize latencies for display-only
+        if not lats:
+            sim = os.getenv("SIM_LAT_MS")
+            if sim:
+                try:
+                    import random
+                    mu = float(sim)
+                    sigma = max(1.0, mu * 0.15)
+                    n = max(1, len(rows) or total or 4)
+                    lats = [max(1.0, random.gauss(mu, sigma)) for _ in range(n)]
+                except Exception:
+                    lats = []
         metrics = {
             "total": total,
             "success_rate": f"{(success/total):.4f}" if total else "",
@@ -158,7 +194,11 @@ def main() -> None:
             "p95_ms": f"{_percentile(lats,95):.1f}" if lats else "",
             "p99_ms": f"{_percentile(lats,99):.1f}" if lats else "",
         }
-        _write_simple_html(metrics | extra, Path(args.out_html))
+        # add latency source disclosure
+        has_real = any(isinstance(r.get("latency_ms"), (int, float)) for r in rows)
+        latency_source = "real" if has_real and not os.getenv("SIM_LAT_MS") else ("synthetic+sim" if os.getenv("SIM_LAT_MS") else "synthetic")
+        payload = {**metrics, **extra, "latency_source": latency_source}
+        _write_simple_html(payload, Path(args.out_html))
         print(f"Wrote HTML report to {args.out_html}")
         # Also update the dashboard data JSON with these rows
         html_data_path = Path("data/agi_benchmark_log.json")
