@@ -34,20 +34,20 @@ jobs:
           if [ -f reports/latest.html ]; then
             cp reports/latest.html public/index.html
           else
-            cat > public/index.html << 'HTML'
-            <!doctype html>
-            <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-            <title>SAVI Bench — Reports</title>
-            <style>body{font:16px/1.5 system-ui,Segoe UI,Arial,sans-serif;margin:2rem;max-width:900px}</style></head>
-            <body>
-              <h1>SAVI Bench</h1>
-              <p>Latest report not yet published to Pages. See docs or the DS005 release:</p>
-              <ul>
-                <li><a href="./docs/index.html">Docs Index</a></li>
-                <li><a href="https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908">DS005 Release</a></li>
-              </ul>
-            </body></html>
-            HTML
+            printf '%s\n' \
+              '<!doctype html>' \
+              '<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>' \
+              '<title>SAVI Bench — Reports</title>' \
+              '<style>body{font:16px/1.5 system-ui,Segoe UI,Arial,sans-serif;margin:2rem;max-width:900px}</style></head>' \
+              '<body>' \
+              '  <h1>SAVI Bench</h1>' \
+              '  <p>Latest report not yet published to Pages. See docs or the DS005 release:</p>' \
+              '  <ul>' \
+              '    <li><a href="./docs/index.html">Docs Index</a></li>' \
+              '    <li><a href="https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908">DS005 Release</a></li>' \
+              '  </ul>' \
+              '</body></html>' \
+              > public/index.html
           fi
       - uses: actions/upload-pages-artifact@v3
         with:
