@@ -17380,5 +17380,105 @@
     "score": 0.0,
     "retries": 0,
     "trace": "report-import"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-11T14:11:38Z-warm-up",
+    "profile": "savi_openai_62",
+    "phase": "Warm-up",
+    "timestamp": "2025-09-11T14:11:38Z",
+    "status": "pass",
+    "score": 65.9,
+    "retries": 1,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-11T14:11:38Z-strength",
+    "profile": "savi_openai_62",
+    "phase": "Strength",
+    "timestamp": "2025-09-11T14:11:38Z",
+    "status": "pass",
+    "score": 62.47,
+    "retries": 1,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-11T14:11:38Z-endurance",
+    "profile": "savi_openai_62",
+    "phase": "Endurance",
+    "timestamp": "2025-09-11T14:11:38Z",
+    "status": "pass",
+    "score": 82.42,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-11T14:11:38Z-competition",
+    "profile": "savi_openai_62",
+    "phase": "Competition",
+    "timestamp": "2025-09-11T14:11:38Z",
+    "status": "pass",
+    "score": 81.41,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-11T14:11:39Z-warm-up",
+    "profile": "savi_openai_63",
+    "phase": "Warm-up",
+    "timestamp": "2025-09-11T14:11:39Z",
+    "status": "pass",
+    "score": 82.11,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-11T14:11:39Z-strength",
+    "profile": "savi_openai_63",
+    "phase": "Strength",
+    "timestamp": "2025-09-11T14:11:39Z",
+    "status": "pass",
+    "score": 70.74,
+    "retries": 1,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-11T14:11:39Z-endurance",
+    "profile": "savi_openai_63",
+    "phase": "Endurance",
+    "timestamp": "2025-09-11T14:11:39Z",
+    "status": "fail",
+    "score": 54.58,
+    "retries": 2,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-11T14:11:39Z-competition",
+    "profile": "savi_openai_63",
+    "phase": "Competition",
+    "timestamp": "2025-09-11T14:11:39Z",
+    "status": "pass",
+    "score": 86.61,
+    "retries": 0,
+    "trace": "auto"
+  },
+  {
+    "run_id": "savi_openai_62-2025-09-11T14:11:38Z",
+    "profile": "savi_openai_62",
+    "phase": "Competition",
+    "timestamp": "2025-09-11T14:11:38Z",
+    "status": "pass",
+    "score": 0.0,
+    "retries": 0,
+    "trace": "report-import"
+  },
+  {
+    "run_id": "savi_openai_63-2025-09-11T14:11:39Z",
+    "profile": "savi_openai_63",
+    "phase": "Competition",
+    "timestamp": "2025-09-11T14:11:39Z",
+    "status": "pass",
+    "score": 0.0,
+    "retries": 0,
+    "trace": "report-import"
   }
 ]
