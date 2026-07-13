@@ -24,8 +24,12 @@ def load_json(path: pathlib.Path) -> dict[str, Any]:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def number(value: Any, default: float = 0.0) -> float:
+    return float(value) if isinstance(value, (int, float)) else default
+
+
 def recording_usage(root: pathlib.Path) -> dict[str, Any]:
-    totals: dict[str, float] = {
+    totals: dict[str, Any] = {
         "prompt_tokens": 0,
         "completion_tokens": 0,
         "total_tokens": 0,
@@ -70,9 +74,9 @@ def recording_usage(root: pathlib.Path) -> dict[str, Any]:
 
 def raw_metrics(summary: dict[str, Any]) -> dict[str, Any]:
     raw = summary.get("raw_scorecard") or {}
-    environments = raw.get("environments") or [] if isinstance(raw, dict) else []
+    environments = (raw.get("environments") or []) if isinstance(raw, dict) else []
     environment = environments[0] if len(environments) == 1 else {}
-    run = {}
+    run: dict[str, Any] = {}
     if isinstance(environment, dict):
         runs = environment.get("runs") or []
         if len(runs) == 1 and isinstance(runs[0], dict):
@@ -118,7 +122,7 @@ def condition_result(
         errors.append("no successful ARC actions recorded")
     if usage.get("run_meta_count", 0) != 1:
         errors.append(f"expected one run_meta record, found {usage.get('run_meta_count')}")
-    if usage.get("total_steps", 0) <= 0:
+    if number(usage.get("total_steps")) <= 0:
         errors.append("no model steps recorded")
 
     agent_errors = summary.get("exit_reason_counts", {}).get("ExitReason.AGENT_ERROR", 0)
@@ -173,12 +177,12 @@ def main() -> int:
     s_score = savi["metrics"].get("score")
     b_score = baseline["metrics"].get("score")
     absolute_delta = (
-        s_score - b_score
+        float(s_score) - float(b_score)
         if isinstance(s_score, (int, float)) and isinstance(b_score, (int, float))
         else None
     )
     relative_delta = (
-        absolute_delta / b_score * 100
+        absolute_delta / float(b_score) * 100
         if isinstance(absolute_delta, (int, float))
         and isinstance(b_score, (int, float))
         and b_score != 0
@@ -212,18 +216,9 @@ def main() -> int:
         "paired_metrics": {
             "absolute_score_uplift": absolute_delta,
             "relative_score_uplift_percent": relative_delta,
-            "levels_completed_delta": (
-                savi["metrics"].get("total_levels_completed", 0)
-                - baseline["metrics"].get("total_levels_completed", 0)
-            ),
-            "actions_delta": (
-                savi["metrics"].get("total_actions", 0)
-                - baseline["metrics"].get("total_actions", 0)
-            ),
-            "total_tokens_delta": (
-                savi["usage"].get("total_tokens", 0)
-                - baseline["usage"].get("total_tokens", 0)
-            ),
+            "levels_completed_delta": number(savi["metrics"].get("total_levels_completed")) - number(baseline["metrics"].get("total_levels_completed")),
+            "actions_delta": number(savi["metrics"].get("total_actions")) - number(baseline["metrics"].get("total_actions")),
+            "total_tokens_delta": number(savi["usage"].get("total_tokens")) - number(baseline["usage"].get("total_tokens")),
         },
     }
 
