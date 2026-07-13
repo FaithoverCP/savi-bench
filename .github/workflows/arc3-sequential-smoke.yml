@@ -1,0 +1,226 @@
+name: ARC-AGI-3 sequential SAVI smoke
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/arc3-sequential-smoke.yml"
+      - "tools/arc3_run_condition.py"
+      - "tools/arc3_prepare_runtime.py"
+      - "tools/arc3_pair_driver.py"
+      - "tools/arc3_pair_summary.py"
+      - "tools/arc3_aggregate_pairs.py"
+      - "tools/arc3_extract_scorecard.py"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arc3-sequential-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  ARC_API_KEY: ${{ secrets.ARC_API_KEY }}
+  SAVI_API_BASE: ${{ secrets.SAVI_API_BASE }}
+  SAVI_API_KEY: ${{ secrets.SAVI_API_KEY }}
+  SAVI_MODEL: ${{ secrets.SAVI_MODEL }}
+  ARC_MIN_CALL_INTERVAL_SECONDS: "6"
+  ARC_QUOTA_MARKER: "arc_quota_exhausted.marker"
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    outputs:
+      ready: ${{ steps.games.outputs.ready }}
+      smoke_one: ${{ steps.games.outputs.smoke_one }}
+      smoke_two: ${{ steps.games.outputs.smoke_two }}
+      smoke_games: ${{ steps.games.outputs.smoke_games }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install discovery dependency
+        run: python -m pip install --quiet requests
+
+      - id: games
+        name: Validate credentials and select two smoke-test games
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, pathlib, requests
+
+          required = ["ARC_API_KEY", "SAVI_API_BASE", "SAVI_API_KEY", "SAVI_MODEL"]
+          presence = {name: bool(os.getenv(name, "").strip()) for name in required}
+          if not all(presence.values()):
+              raise SystemExit("Missing required GitHub Actions secrets: " + str(presence))
+
+          response = requests.get(
+              "https://arcprize.org/api/games",
+              headers={"X-API-Key": os.environ["ARC_API_KEY"], "Accept": "application/json"},
+              timeout=30,
+          )
+          response.raise_for_status()
+          payload = response.json()
+          games = [str(item["game_id"]) for item in payload if isinstance(item, dict) and item.get("game_id")]
+          if len(games) < 2:
+              raise SystemExit(f"ARC returned fewer than two games: {games}")
+
+          smoke_one = next((game for game in games if game.startswith("tl01")), games[0])
+          smoke_two = next(
+              (game for game in games if game.startswith("ls20") and game != smoke_one),
+              next(game for game in games if game != smoke_one),
+          )
+          smoke_games = [smoke_one, smoke_two]
+          record = {
+              "credential_presence": presence,
+              "available_game_count": len(games),
+              "available_games": games,
+              "smoke_games": smoke_games,
+              "benchmark_design": "sequential paired A/B; opposite condition order by game",
+          }
+          pathlib.Path("arc3_smoke_discovery.json").write_text(json.dumps(record, indent=2), encoding="utf-8")
+
+          compact = json.dumps(smoke_games, separators=(",", ":"))
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write("ready=true\n")
+              output.write(f"smoke_one={smoke_one}\n")
+              output.write(f"smoke_two={smoke_two}\n")
+              output.write(f"smoke_games={compact}\n")
+          print(json.dumps(record, indent=2))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: arc3-sequential-smoke-discovery
+          path: arc3_smoke_discovery.json
+          retention-days: 30
+
+  smoke:
+    needs: discover
+    if: needs.discover.outputs.ready == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install and pin the official ARC-AGI-3 benchmark
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m pip install --upgrade pip uv requests pyyaml
+          git clone https://github.com/arcprize/arc-agi-3-benchmarking.git arc3-benchmarking
+          git -C arc3-benchmarking checkout dc814bedbc0d694b25cc5dd9e546a6a249aef24e
+          cd arc3-benchmarking
+          uv sync
+
+      - name: Configure the rate-efficient matched GPT runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p evidence
+          python tools/arc3_prepare_runtime.py \
+            --benchmark-dir arc3-benchmarking \
+            --config-id savi-sequential-v3 \
+            --max-output-tokens 2048 \
+            --compact-threshold 100000 | tee evidence/runtime_config.txt
+          cp tools/arc3_run_condition.py arc3-benchmarking/run_condition.py
+          git -C arc3-benchmarking rev-parse HEAD > evidence/official_benchmark_commit.txt
+          printf '%s\n' "$GITHUB_SHA" > evidence/savi_bench_commit.txt
+          sha256sum \
+            tools/arc3_run_condition.py \
+            tools/arc3_prepare_runtime.py \
+            tools/arc3_pair_driver.py \
+            tools/arc3_pair_summary.py \
+            tools/arc3_aggregate_pairs.py \
+            tools/arc3_extract_scorecard.py \
+            > evidence/source_hashes.sha256
+
+      - name: Run first game pair — SAVI first
+        id: pair_one
+        continue-on-error: true
+        shell: bash
+        run: |
+          python tools/arc3_pair_driver.py \
+            --game "${{ needs.discover.outputs.smoke_one }}" \
+            --order savi-first \
+            --benchmark-dir arc3-benchmarking \
+            --config savi-sequential-v3 \
+            --evidence-dir "evidence/${{ needs.discover.outputs.smoke_one }}" \
+            --cooldown-seconds 65
+
+      - name: Cool down the organization TPM window between game pairs
+        if: always()
+        run: sleep 65
+
+      - name: Run second game pair — baseline first
+        id: pair_two
+        if: always()
+        continue-on-error: true
+        shell: bash
+        run: |
+          python tools/arc3_pair_driver.py \
+            --game "${{ needs.discover.outputs.smoke_two }}" \
+            --order baseline-first \
+            --benchmark-dir arc3-benchmarking \
+            --config savi-sequential-v3 \
+            --evidence-dir "evidence/${{ needs.discover.outputs.smoke_two }}" \
+            --cooldown-seconds 65
+
+      - name: Build the two-game matched smoke report
+        id: aggregate
+        if: always()
+        continue-on-error: true
+        env:
+          EXPECTED_GAMES: ${{ needs.discover.outputs.smoke_games }}
+        shell: bash
+        run: |
+          python tools/arc3_aggregate_pairs.py \
+            --root evidence \
+            --expected-games-json "$EXPECTED_GAMES" \
+            --output evidence/arc3_smoke_aggregate.json \
+            --report evidence/ARC3_SMOKE_REPORT.md
+
+      - name: Write the result into the GitHub job summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f evidence/ARC3_SMOKE_REPORT.md ]; then
+            cat evidence/ARC3_SMOKE_REPORT.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "ARC smoke report was not generated." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Upload complete smoke-test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arc3-sequential-paired-smoke
+          path: evidence/
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Enforce smoke-test validity before any larger spend
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, pathlib
+          path = pathlib.Path("evidence/arc3_smoke_aggregate.json")
+          if not path.exists():
+              raise SystemExit("INVALID: aggregate smoke result is missing")
+          result = json.loads(path.read_text())
+          if not result.get("valid"):
+              print(json.dumps(result, indent=2))
+              raise SystemExit("INVALID: the sequential paired smoke test did not pass")
+          print("VALID SEQUENTIAL PAIRED SMOKE TEST")
+          print(json.dumps(result["aggregate_scores"], indent=2))
+          print(json.dumps(result["paired_statistics"], indent=2))
+          PY
