@@ -18,7 +18,7 @@ permissions:
 
 concurrency:
   group: arc3-sequential-smoke-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 env:
   ARC_API_KEY: ${{ secrets.ARC_API_KEY }}
@@ -212,7 +212,7 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
-          import json, pathlib, sys
+          import json, pathlib
           path = pathlib.Path("evidence/arc3_smoke_aggregate.json")
           if not path.exists():
               raise SystemExit("INVALID: aggregate smoke result is missing")
