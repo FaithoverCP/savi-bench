@@ -1,0 +1,24 @@
+name: ARC-AGI-3 retired parallel benchmark v2
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/arc3-full-savi-v2.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arc3-valid-full-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  retired:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Parallel benchmark retired
+        run: |
+          echo "This workflow was retired after 25-way concurrency saturated the model TPM limit."
+          echo "Use ARC-AGI-3 sequential SAVI smoke and its validated sequential successor instead."
