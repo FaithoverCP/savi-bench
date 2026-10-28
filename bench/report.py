@@ -90,7 +90,7 @@ table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #dd
 </style></head>
 <body>
 <h1>SAVI Report</h1>
-<div class="notice" style="margin:12px 0;padding:12px 14px;border:2px solid #b45309;border-radius:8px;background:#fffbeb;color:#78350f"><strong>Status notice (2026-10-28).</strong> This repository is a benchmark harness under repair and does not currently publish verified benchmark results. The DS005 &quot;10,000-agent / $250-cap&quot; proof pack was generated in synthetic mode: its manifest records <code>mode: synthetic</code> with no model or API, and its task count and cost were computed from configuration rather than executed. Dashboard scores produced in synthetic mode were random placeholders, an automatic &quot;pass&quot; row was added for every run regardless of outcome, and every real-mode task logged so far scored 0. Automatic hourly runs are paused. Please do not cite figures from this repository until a verified run is published.</div>
+<div class="notice" style="margin:12px 0;padding:12px 14px;border:2px solid #b45309;border-radius:8px;background:#fffbeb;color:#78350f"><strong>Status notice (2026-10-28).</strong> This repository is a small benchmark harness. It does not publish verified benchmark results. On 2026-10-28 the earlier dashboard data and the DS005 &quot;10,000-agent / $250-cap&quot; proof pack were removed because they did not reflect real runs: the proof pack was generated in synthetic mode (no model or API was called, and its task count and cost were computed from configuration), synthetic dashboard scores were random placeholders, an automatic &quot;pass&quot; row was added for every run, and every real-mode task logged scored 0. The removed files remain in git history. Automatic runs are paused.</div>
 {banner_html}
 <div class=\"badges\">
   <span>mode: {metrics.get('mode','n/a')}</span>
@@ -100,7 +100,6 @@ table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #dd
   <span>processed: {metrics.get('processed_tasks','n/a')}</span>
   <span>commit: {(metrics.get('git_commit') or '')[:7]}</span>
 </div>
-<div class=\"links\" style=\"margin:6px 0 12px 0\">\n  <a href=\"https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908\">DS005 proof pack</a>\n  <a href=\"https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908\">sha256sums.txt</a>\n</div>
 <p>Generated: {datetime.utcnow().isoformat()}Z</p>
 <table>
   <thead><tr><th>Metric</th><th>Value</th></tr></thead>

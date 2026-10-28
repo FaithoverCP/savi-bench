@@ -40,7 +40,6 @@ jobs:
       - name: Summarize results and build latest HTML (with demo latencies)
         env:
           BANNER_TEXT: "Benchmark harness under repair: no verified results published"
-          BANNER_LINK: "https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908"
         shell: bash
         run: |
           set -euo pipefail

@@ -68,4 +68,3 @@ python tools/summarize_and_pack.py
 ```
 
 - Verify `reports/latest.html` badges (mode/model/budget/stop/processed/commit)
-- Verify `dist/proof_pack_FULL.tgz` + `dist/sha256sums.txt`

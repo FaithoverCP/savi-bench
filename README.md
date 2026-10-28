@@ -1,27 +1,14 @@
 # savi-bench
 
-> **Status notice (2026-10-28).** This repository is a benchmark harness under repair and does not currently publish verified benchmark results. The DS005 "10,000-agent / $250-cap" proof pack was generated in synthetic mode: its manifest records `mode: synthetic` with no model or API, and its task count and cost were computed from configuration rather than executed. Dashboard scores produced in synthetic mode were random placeholders, an automatic "pass" row was added for every run regardless of outcome, and every real-mode task logged so far scored 0. Automatic hourly runs are paused. Please do not cite figures from this repository until a verified run is published.
+> **Status (2026-10-28).** This repository is a small benchmark harness. It does not publish verified benchmark results. On 2026-10-28 the earlier dashboard data and the DS005 "10,000-agent / $250-cap" proof pack were removed because they did not reflect real runs: the proof pack was generated in synthetic mode (no model or API was called, and its task count and cost were computed from configuration), synthetic dashboard scores were random placeholders, an automatic "pass" row was added for every run, and every real-mode task logged scored 0. The removed files remain in git history. Automatic runs are paused.
 
-Public, rolling SAVI Benchmarks. Hourly AGI cycle (Warm-up, Strength, Endurance, Competition) with pass rate, scores, recovery stats, and competitor deltas. Auto-updates from runner; data lives in `data/agi_benchmark_log.json`. Public, reproducible, investor-friendly.
+## What this is
+A minimal harness that sends a small task suite (`bench/suites/`) to an OpenAI-compatible endpoint, grades the replies (`bench/grade.py`) and writes a report.
+With no API key configured it runs in synthetic mode, which writes placeholder rows labelled `synthetic`. Those are never benchmark results.
 
-Live, verifiable benchmark. Reproduce a 10k-agent run with a $250 cap; verify with SHA256; view human-readable results in `reports/latest.html`.
-
-## Try it now
-- Live Report: https://faithovercp.github.io/savi-bench/
-- DS005 Proof Pack: https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908
-
-## Latest DS005 Proof
-
-- Release: https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908
-- Assets: `proof_pack_FULL.tgz`, `sha256sums.txt`, `latency_summary.csv`, `latest.html`
-- Highlights: 10k-agent run with budget cap enforcement (`stop_reason=budget_cap_reached_250.0`).
-
-## Quick Test Checklist
-1) Run: `python -m bench.run --config bench/config.json --profile savi_openai_1000 --budget-usd 250`
-2) Report: `python -m bench.report results/latest.jsonl --out reports/latest.html`
-3) Pack: `python tools/summarize_and_pack.py`
-4) Verify: `./tools/verify.ps1 -Dir ./dist` (or `sha256sum` on macOS/Linux)
-
-Demo modes: see `DEMO_MODE.md`
-
-- Getting started: docs/GETTING_STARTED.md
+## Run it
+```
+python -m bench.run --config bench/config.json --profile savi_openai_62
+python -m bench.report --config bench/config.json
+```
+Set `OPENAI_API_KEY` (or `SAVI_API_KEY` and `SAVI_API_BASE`) for a real run. Manifests record only tasks that actually executed.
