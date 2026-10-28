@@ -81,7 +81,7 @@ def _write_simple_html(metrics: Dict[str, Any], out_path: Path) -> None:
         banner_html = ""
     html = f"""<!doctype html>
 <html lang=\"en\"><head><meta charset=\"utf-8\"><title>SAVI Report</title>
-<meta property=\"og:title\" content=\"SAVI Bench – Latest Report\">\n<meta property=\"og:description\" content=\"{metrics.get('banner_text','10,000 agents · $250 cap · DS005 proof pack')}\">\n<meta property=\"og:type\" content=\"website\">\n<meta name=\"twitter:card\" content=\"summary_large_image\">\n<style>body{{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:2rem;line-height:1.4}}
+<meta property=\"og:title\" content=\"SAVI Bench – Latest Report\">\n<meta property=\"og:description\" content=\"{metrics.get('banner_text','SAVI Bench harness: no verified results published')}\">\n<meta property=\"og:type\" content=\"website\">\n<meta name=\"twitter:card\" content=\"summary_large_image\">\n<style>body{{font-family:system-ui,Segoe UI,Roboto,sans-serif;margin:2rem;line-height:1.4}}
 table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #ddd}}
 .badges span{{display:inline-block;background:#f2f4f7;border-radius:6px;padding:4px 8px;margin-right:6px;font-size:.85rem;color:#333}}
 .links a{{margin-right:12px}}
@@ -90,6 +90,7 @@ table{{border-collapse:collapse}}td,th{{padding:.4rem .6rem;border:1px solid #dd
 </style></head>
 <body>
 <h1>SAVI Report</h1>
+<div class="notice" style="margin:12px 0;padding:12px 14px;border:2px solid #b45309;border-radius:8px;background:#fffbeb;color:#78350f"><strong>Status notice (2026-10-28).</strong> This repository is a benchmark harness under repair and does not currently publish verified benchmark results. The DS005 &quot;10,000-agent / $250-cap&quot; proof pack was generated in synthetic mode: its manifest records <code>mode: synthetic</code> with no model or API, and its task count and cost were computed from configuration rather than executed. Dashboard scores produced in synthetic mode were random placeholders, an automatic &quot;pass&quot; row was added for every run regardless of outcome, and every real-mode task logged so far scored 0. Automatic hourly runs are paused. Please do not cite figures from this repository until a verified run is published.</div>
 {banner_html}
 <div class=\"badges\">
   <span>mode: {metrics.get('mode','n/a')}</span>
@@ -284,15 +285,18 @@ def main() -> None:
                 rec.setdefault("timestamp", datetime.utcnow().isoformat() + "Z")
                 rec.setdefault("profile", jf.stem.split("-")[0])
                 rec.setdefault("phase", "Competition")
-                rec.setdefault("status", "pass")
+                rec.setdefault("status", "unknown")
                 rec.setdefault("score", 0.0)
                 rec.setdefault("retries", 0)
                 rec.setdefault("trace", "report-import-json")
                 new_entries.append(rec)
                 seen.add(k)
 
-        # Fall back to minimal entries from txt files (back-compat)
-        for file in results_dir.glob("*.txt"):
+        # Fall back to minimal entries from txt files (back-compat).
+        # 2026-10-28: disabled. A txt marker records that a run happened, not its result,
+        # and it used to be logged as status "pass" regardless of outcome.
+        txt_markers = []  # was: results_dir.glob("*.txt")
+        for file in txt_markers:
             info = _parse_result_file(file.read_text(encoding="utf-8"))
             profile = info.get("profile", file.stem)
             ts = info.get("run") or datetime.utcnow().isoformat()

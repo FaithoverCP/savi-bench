@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>SAVI Bench DS005 — Live Report & Proof Pack</title>
+  <title>SAVI Bench DS005 — status notice</title>
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
     body{font:16px/1.5 system-ui,Segoe UI,Arial,sans-serif;margin:2rem;max-width:900px}
@@ -15,9 +15,7 @@
 </head>
 <body>
   <h1>SAVI Bench DS005</h1>
-  <p class="pill">10k Agents</p>
-  <p class="pill">$250 Cap</p>
-  <p class="pill">SHA256-Verified</p>
+  <div class="notice" style="margin:12px 0;padding:12px 14px;border:2px solid #b45309;border-radius:8px;background:#fffbeb;color:#78350f"><strong>Status notice (2026-10-28).</strong> This repository is a benchmark harness under repair and does not currently publish verified benchmark results. The DS005 &quot;10,000-agent / $250-cap&quot; proof pack was generated in synthetic mode: its manifest records <code>mode: synthetic</code> with no model or API, and its task count and cost were computed from configuration rather than executed. Dashboard scores produced in synthetic mode were random placeholders, an automatic &quot;pass&quot; row was added for every run regardless of outcome, and every real-mode task logged so far scored 0. Automatic hourly runs are paused. Please do not cite figures from this repository until a verified run is published.</div>
 
   <div class="grid">
     <p>▶️ <a href="/savi-bench/reports/latest.html">Open the latest human-readable report</a></p>
@@ -28,7 +26,7 @@
   <hr />
   <h3>What you’re seeing</h3>
   <ul>
-    <li>Live, reproducible benchmark with budget cap and cryptographic integrity.</li>
+    <li>Status: harness under repair (see the notice above). The SHA256 files verify file integrity only, not that a run took place.</li>
     <li>Badges in the report show: mode / model / budget / stop reason / processed / commit.</li>
     <li>Public shows results—not recipes. Method internals are NDA-only.</li>
   </ul>

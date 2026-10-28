@@ -15,9 +15,10 @@
       </span>
       SAVI Benchmarks
     </h1>
-    <p class="sub">Live hourly results with phase breakdown & competition highlights.</p>
+    <p class="sub">Benchmark harness under repair: no verified results are published.</p>
     <p class="sub" id="liveMeta">Updated: <span id="updatedAt">-</span> · Next: <span id="nextRefresh">-</span></p>
   </header>
+  <div class="notice" style="margin:12px 0;padding:12px 14px;border:2px solid #b45309;border-radius:8px;background:#fffbeb;color:#78350f"><strong>Status notice (2026-10-28).</strong> This repository is a benchmark harness under repair and does not currently publish verified benchmark results. The DS005 &quot;10,000-agent / $250-cap&quot; proof pack was generated in synthetic mode: its manifest records <code>mode: synthetic</code> with no model or API, and its task count and cost were computed from configuration rather than executed. Dashboard scores produced in synthetic mode were random placeholders, an automatic &quot;pass&quot; row was added for every run regardless of outcome, and every real-mode task logged so far scored 0. Automatic hourly runs are paused. Please do not cite figures from this repository until a verified run is published.</div>
 
   <main>
     <div id="badges" style="font-size:0.9em;color:#4b5563;margin:8px 0 12px 0;"></div>
@@ -44,13 +45,13 @@
     <section>
       <h2>Notes</h2>
       <ul>
-        <li>Runner pushes <code>data/agi_benchmark_log.json</code> hourly.</li>
+        <li>Automatic hourly runs are paused. <code>data/agi_benchmark_log.json</code> is historical and contains no verified results.</li>
         <li>If you see “No data yet”, refresh after the next run.</li>
       </ul>
     </section>
   </main>
 
-  <footer><small>© SAVI — auto-updates hourly.</small></footer>
+  <footer><small>© SAVI — automatic updates paused (2026-10-28).</small></footer>
 
 <script>
 async function loadData() {

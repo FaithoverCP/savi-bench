@@ -1,10 +1,8 @@
 name: hourly-bench
 
 on:
-  push:
-    branches: ["main"]
-  schedule:
-    - cron: "0 * * * *"      # Top of every hour (UTC)
+  # 2026-10-28: automatic runs paused (push and hourly schedule removed) until the
+  # harness publishes verified results. Manual runs only.
   workflow_dispatch:
 
 permissions:
@@ -41,8 +39,7 @@ jobs:
 
       - name: Summarize results and build latest HTML (with demo latencies)
         env:
-          SIM_LAT_MS: "50"  # demo latencies for public Pages; labeled as synthetic+sim
-          BANNER_TEXT: "10,000 agents · $250 cap · DS005 proof pack"
+          BANNER_TEXT: "Benchmark harness under repair: no verified results published"
           BANNER_LINK: "https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908"
         shell: bash
         run: |

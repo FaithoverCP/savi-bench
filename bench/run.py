@@ -63,7 +63,7 @@ def _gen_phase_entries(profile: str, timestamp: str) -> List[Dict[str, Any]]:
     entries: List[Dict[str, Any]] = []
     for phase in PHASES:
         score = _score_for_phase(phase)
-        status = _status_from_score(score)
+        status = "synthetic"  # 2026-10-28: random placeholder, never a pass/fail result
         retries = 0 if score >= 80 else (1 if score >= 60 else 2)
         entries.append(
             {
@@ -74,7 +74,7 @@ def _gen_phase_entries(profile: str, timestamp: str) -> List[Dict[str, Any]]:
                 "status": status,
                 "score": score,
                 "retries": retries,
-                "trace": "auto",
+                "trace": "synthetic-random-placeholder",
             }
         )
     return entries
@@ -330,6 +330,12 @@ def main() -> None:
             # No cost model; record cap intent
             stop_reason = f"budget_cap_reached_{args.budget_usd}"
             total_cost_usd = None
+
+    # 2026-10-28: record only what actually executed. The values above were derived
+    # from configuration (pods x size, budget / per-task cost), not from executed tasks.
+    processed_tasks = len(task_traces) if run_real else 0
+    total_cost_usd = None  # this runner does not measure cost
+    stop_reason = None if run_real else "synthetic_mode_no_tasks_executed"
 
     # Gather reproducibility + env metadata
     try:

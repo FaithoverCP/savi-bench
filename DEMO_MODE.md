@@ -1,5 +1,7 @@
 # SAVI Bench — Demo Modes (DS005)
 
+> **Status notice (2026-10-28).** This repository is a benchmark harness under repair and does not currently publish verified benchmark results. The DS005 "10,000-agent / $250-cap" proof pack was generated in synthetic mode: its manifest records `mode: synthetic` with no model or API, and its task count and cost were computed from configuration rather than executed. Dashboard scores produced in synthetic mode were random placeholders, an automatic "pass" row was added for every run regardless of outcome, and every real-mode task logged so far scored 0. Automatic hourly runs are paused. Please do not cite figures from this repository until a verified run is published.
+
 ## Investor Quick Demo (2–3 minutes)
 - Open DS005: https://github.com/FaithoverCP/savi-bench/releases/tag/DS005-20250908
 - Show the investor summary, assets list, and open `latest.html`.
